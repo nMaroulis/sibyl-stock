@@ -1,5 +1,7 @@
 import streamlit as st
 from src.database.database_client import get_stocks_list
+from src.ui_elements.stock_analysis import get_stock_analysis
+
 
 st.set_page_config(layout="wide")
 
@@ -21,3 +23,4 @@ else:
         del st.session_state.selected_stock
         st.rerun()
     st.write("Analysis for", st.session_state.selected_stock)
+    get_stock_analysis(st.session_state.selected_stock)
