@@ -1,7 +1,9 @@
 import streamlit as st
 from src.library.apis.yahoo_client import get_stock_details
 import re
-from src.plots.stock_info_plots import risk_gauge
+from src.plots.stock_info_plots import risk_gauge, linear_gauge_chart
+from src.ui_elements.element_styles import col_style2
+
 
 
 def extract_symbol(stock_string) -> str | None:
@@ -11,15 +13,22 @@ def extract_symbol(stock_string) -> str | None:
 
 
 def display_company_info(info: dict, stock_symbol: str):
-    st.title(info.get("longName", "Company Information"))
-    st.write("Stock symbol: {}".format(stock_symbol))
-    st.write(f"**Industry:** {info.get('industryDisp', 'N/A')}")
-    st.write(f"**Sector:** {info.get('sectorDisp', 'N/A')}")
-    st.write(f"**Country:** {info.get('country', 'N/A')}")
-    st.write(f"**Employees:** {info.get('fullTimeEmployees', 'N/A')}")
-    st.write(f"**Website:** [Visit Website]({info.get('website', 'N/A')})")
+    # st.html(col_style2)
+    st.title(":material/badge: " + info.get("longName", "Company Information"))
+    st.html("</br>")
+    c0, c1, c2 = st.columns(3)
+    with c0:
+        st.write(":material/id_card: Stock symbol: {}".format(stock_symbol))
+        st.write(f":material/link: **Website:** [Visit Website]({info.get('website', 'N/A')})")
+    with c1:
+        st.write(f":material/domain: **Industry:** {info.get('industryDisp', 'N/A')}")
+        st.write(f":material/domain_add: **Sector:** {info.get('sectorDisp', 'N/A')}")
+    with c2:
+        st.write(f":material/pin_drop: **Country:** {info.get('country', 'N/A')}")
+        st.write(f":material/person_apron: **Employees:** {info.get('fullTimeEmployees', 'N/A')}")
 
-    st.header("Market Data")
+    st.html("</br>")
+    st.subheader("Market Data")
     c0, c1, c2 = st.columns(3)
     with c0:
         st.metric("Current Price", str(info.get('currentPrice'))+"$")  if "currentPrice" in info else st.metric("Current Price", "N/A", border=True)
@@ -34,30 +43,31 @@ def display_company_info(info: dict, stock_symbol: str):
 
     # Financial Health Section
     # Create columns for market data and financial metrics
+    st.html("</br>")
+    st.subheader("Financial Metrics")
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Market Data")
         st.write(f"**Beta:** {info.get('beta', 'N/A')}")
-    with col2:
-        st.subheader("Financial Metrics")
         st.write(f"**Trailing P/E:** {info.get('trailingPE', 'N/A')}")
         st.write(f"**Forward P/E:** {info.get('forwardPE', 'N/A')}")
         st.write(f"**Price to Sales (TTM):** {info.get('priceToSalesTrailing12Months', 'N/A')}")
+    with col2:
         st.write(f"**Price to Book:** {info.get('priceToBook', 'N/A')}")
         st.write(f"**Profit Margin:** {info.get('profitMargins', 'N/A')}%")
         st.write(f"**Operating Margin:** {info.get('operatingMargins', 'N/A')}%")
 
     # Dividend & Cash Flow Section
-    st.header("Dividends & Cash Flow")
+    st.html("</br>")
+    st.subheader("Dividends & Cash Flow")
     col1, col2 = st.columns(2)
     with col1:
         st.write(f"**Dividend Rate:** ${info.get('dividendRate', 'N/A')}")
         st.write(f"**Dividend Yield:** {info.get('dividendYield', 'N/A')}%") #  * 100:.2f
+        st.write(f"**Last Dividend Date:** {info.get('lastDividendDate', 'N/A')}")
     with col2:
-        st.write(f"**Free Cash Flow:** ${info.get('freeCashflow', 'N/A'):,}")
-        st.write(f"**Operating Cash Flow:** ${info.get('operatingCashflow', 'N/A'):,}")
+        st.write(f"**Free Cash Flow:** ${info.get('freeCashflow', 'N/A')}")
+        st.write(f"**Operating Cash Flow:** ${info.get('operatingCashflow', 'N/A')}")
 
-    st.write(f"**Last Dividend Date:** {info.get('lastDividendDate', 'N/A')}")
 
     # Risk Section
     st.header("Risk & Governance")
@@ -97,10 +107,14 @@ def display_company_info(info: dict, stock_symbol: str):
         st.write(f"**52 Week Low:** ${info.get('fiftyTwoWeekLow', 'N/A')}")
     with col2:
         st.write(f"**Target Mean Price:** ${info.get('targetMeanPrice', 'N/A')}")
-        st.write(
-            f"**Recommendation:** {info.get('recommendationKey', 'N/A')} - Mean: {info.get('recommendationMean', 'N/A')}")
-        st.write(f"**Analyst Opinions:** {info.get('numberOfAnalystOpinions', 'N/A')}")
 
+    st.subheader("Yahoo Finance Analyst Opinions")
+    st.write(f"{info.get('numberOfAnalystOpinions', 'N/A')} **Analysts** generated the following recommendation **{info.get('recommendationKey', 'N/A')}** with a score of **{info.get('recommendationMean', 'N/A')}**.")
+    # st.write(f"**Recommended Action**:")
+    # st.html(f"""<h2 style="color:blue;margin:0">{info.get('recommendationKey', 'N/A')}</h2>""")
+    c0, _, _ = st.columns(3)
+    with c0:
+        st.pyplot(linear_gauge_chart(1.4))
 
 
 def get_stock_analysis(stock_symbol: str):
