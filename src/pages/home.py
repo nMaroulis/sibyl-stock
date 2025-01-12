@@ -22,5 +22,4 @@ else:
     if st.sidebar.button("Reset Analysis", type="primary", use_container_width=True, icon=":material/restart_alt:"):
         del st.session_state.selected_stock
         st.rerun()
-    st.write("Analysis for", st.session_state.selected_stock)
     get_stock_analysis(st.session_state.selected_stock)
